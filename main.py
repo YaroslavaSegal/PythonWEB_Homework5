@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 
+
 from aiohttp import ClientSession, ClientConnectorError
 
 
@@ -20,9 +21,11 @@ async def request(url: str):
 
 
 def pb_handler(result):
-    exc1, = list(filter(lambda el: el["ccy"] == "EUR", result))
-    exc2, = list(filter(lambda el: el["ccy"] == "USD", result))
-    return f"EUR: buy: {exc1['buy']}, sale: {exc1['sale']} \n USD: buy: {exc2['buy']}, sale: {exc2['sale']}"
+    exc1 = result["exchangeRate"][8] # EURO
+    exc2 = result["exchangeRate"][23] #USD
+    return (f"EUR: buy: {exc1['purchaseRate']}, sale: {exc1['saleRate']} \n"
+            f"USD: buy: {exc2['purchaseRate']}, sale: {exc2['saleRate']}")
+
 
 
 async def get_exchange(url, handler):
@@ -41,6 +44,7 @@ if __name__ == '__main__':
             if 1 <= n <= 10:
                 for i in range(n):
                     day = (datetime.now().date() - timedelta(i)).strftime("%d.%m.%Y")
+                    print(day)
                     URL_PB = f"https://api.privatbank.ua/p24api/exchange_rates?json&date={day}"
                     result = asyncio.run(get_exchange(URL_PB, pb_handler))
                     print(result)
